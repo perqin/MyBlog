@@ -1,0 +1,42 @@
+doctype html
+html(ng-app=appName)
+    head(ng-controller='HeadController')
+        script(type='application/javascript',src=angularJsSrc)
+        script(type='application/javascript',src=angularRouteSrc)
+        script(type='application/javascript',src=angularAppSrc)
+        link(rel='stylesheet',href=baseCssSrc)
+        link(rel='stylesheet',href=themeCssSrc)
+        title {{ pageTitle }}
+        link(rel='icon',href='/favicon.ico')
+    body
+        div#top-bar
+            div#user-info-panel
+                div
+                    p
+                        span Register
+                        span Login
+                div
+                    p
+                        span Nickname(username)
+                        span Logout
+            div#register-login-panel
+                div#register-panel
+                    span Username
+                    input
+                    span Password
+                    input
+                    span Confirm
+                    input
+                    span Nickname
+                    input
+                    button Register
+                div#login-panel
+                    span Username
+                    input
+                    span Password
+                    input
+                    button Login
+        div#header-bar
+            h1= appName
+        div#content
+            ng-view
