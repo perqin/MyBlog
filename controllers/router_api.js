@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var modelUser = require('../models/model_user');
+var modelPost = require('../models/model_post');
 
 router.post('/login', function(req, res, next) {
     var resJson = {
@@ -52,38 +53,12 @@ router.get('/posts', function (req, res, next) {
         error: {
             code: 0,
             message: ''
-        },
-        data: [
-            {
-                id: 0,
-                title: 'PHP is the best language!',
-                author: {
-                    username: 'admin',
-                    nickname: 'Admin'
-                },
-                summary: 'Yes PHP is the best language in the world! Yes PHP is the be...'
-            },
-            {
-                id: 1,
-                title: 'PHP is not the best language!',
-                author: {
-                    username: 'fkadmin',
-                    nickname: 'FkingAdmin'
-                },
-                summary: 'Yes PHP is the best language in the world! Yes PHP is the be...'
-            },
-            {
-                id: 2,
-                title: 'Javascript is the best language!',
-                author: {
-                    username: 'jsadmin',
-                    nickname: 'JsGod'
-                },
-                summary: 'If one app can be written in js, then it will be written in ...'
-            }
-        ]
+        }
     };
-    res.send(JSON.stringify(resJson));
+    modelPost.readPosts(function (posts) {
+        resJson.data = posts;
+        res.send(JSON.stringify(resJson));
+    });
 });
 
 router.get('/post/:pid', function (req, res, next) {
@@ -104,6 +79,21 @@ router.get('/post/:pid', function (req, res, next) {
 
     };
     res.send(JSON.stringify(resJson));
+});
+
+router.post('/post', function (req, res, next) {
+    var resJson = {
+        error: {
+            code: 0,
+            message: ''
+        },
+        data: {}
+    };
+    // TODO : author_id
+    modelPost.createPost(req.body.title, 0, req.body.content, function (err, pid) {
+        resJson.data.post_id = pid;
+        res.send(JSON.stringify(resJson));
+    })
 });
 
 module.exports = router;

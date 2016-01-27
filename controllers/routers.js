@@ -3,7 +3,7 @@ var routerApi = require('./router_api');
 
 function addRouters(app) {
     app.use('/', routerMain);
-    app.use('/users', routerApi);
+    app.use('/api', routerApi);
 }
 
 module.exports = {

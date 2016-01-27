@@ -9,18 +9,18 @@ html(ng-app=appName)
         title {{ pageTitle }}
         link(rel="icon",href="/favicon.ico")
     body
-        div#top-bar
+        div#top-bar(ng-controller="TopBarController")
             div#user-info-panel
-                div
+                div(ng-if="user.permission == 'guest'")
                     p
-                        span Register
-                        span Login
-                div
+                        span(ng-click="metaData.panelState = metaData.panelState == 'register' ? 'none' : 'register'") Register
+                        span(ng-click="metaData.panelState = metaData.panelState == 'login' ? 'none' : 'login'") Login
+                div(ng-if="user.permission != 'guest'")
                     p
                         span Nickname(username)
-                        span Logout
-            div#register-login-panel
-                div#register-panel
+                        span(ng-click="user.permission = 'guest'") Logout
+            div#register-login-panel(ng-if="user.permission == 'guest'")
+                div#register-panel(ng-if="metaData.panelState == 'register'")
                     span Username
                     input
                     span Password
@@ -29,35 +29,35 @@ html(ng-app=appName)
                     input
                     span Nickname
                     input
-                    button Register
-                div#login-panel
+                    button(ng-click="user.permission = 'user';metaData.panelState = 'none'") Register
+                div#login-panel(ng-if="metaData.panelState == 'login'")
                     span Username
                     input
                     span Password
                     input
-                    button Login
+                    button(ng-click="user.permission = 'user';metaData.panelState = 'none'") Login
         div#header-bar
             h1= appName
         div#content(ng-controller="PostListController")
             button(ng-if="!metaData.addingNewPost",ng-click="toAddNewPost()") Add new post
             div(ng-if="metaData.addingNewPost")
                 div
-                    input(ng-model="newPostTitle",placeholder="Post title")
+                    input(ng-model="metaData.newPostTitle",placeholder="Post title")
                 div
-                    input(ng-model="newPostBody",placeholder="Post body")
+                    input(ng-model="metaData.newPostBody",placeholder="Post body")
                 div
-                    button Post
+                    button(ng-click="addNewPost()") Post
                     button(ng-click="metaData.addingNewPost = false") Cancel
             h2 There {{ posts.length > 1 ? "are" : "is" }} {{ posts.length > 0 ? posts.length : "no" }} post{{ posts.length > 1 ? "s" : "" }}.
             div(ng-repeat="post in posts")
-                h3 Post Title
-                h5 Author
+                h3 {{ post.title }}
+                h5 {{ post.author_id }}
                 p Summary
                 div#post-content-panel(ng-if="post.expanded")
-                    p Content
+                    p {{ post.content }}
                 div#post-edit-panel(ng-if="$parent.metaData.editingIndex == $index")
                     div
-                        input
+                        input(ng-model="post.content")
                     div
                         button Update
                         button(ng-click="$parent.metaData.editingIndex = -1") Cancel
