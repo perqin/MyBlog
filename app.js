@@ -1,4 +1,6 @@
 var express = require('express');
+var session = require('express-session');
+var FileStore = require('session-file-store')(session);
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -18,6 +20,20 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({
+    cookie: {
+        path: '/',
+        httpOnly: true,
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    },
+    resave: true,
+    saveUninitialized: false,
+    secret: 'MyBlog',
+    store: new FileStore({
+        ttl: 7 * 24 * 60 * 60
+    })
+}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 routers.addRouters(app);
