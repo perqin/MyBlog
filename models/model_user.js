@@ -25,15 +25,19 @@ function init(dbObj) {
 }
 
 function createUser(info, callback) {
-    var result = {};
+    var result = {
+        userInfo: {}
+    };
     var v = validator.validate(info, ['username', 'password', 'nickname']);
     uniqueCheck(info, ['username'], function (u) {
         result.errorCode = v.isValid && u.isUnique ? 0 : 1;
         result.errorMsg = !v.isValid ? v.errorMsg : (!u.isUnique ? u.errorMsg : '');
         if (result.errorCode == 0) {
             db.collection('users').insertOne(info).then(function (r) {
-                result.data = {};
-                result.data.userId = r.ops[0]._id;
+                result.userInfo.user_id = r.ops[0]._id;
+                result.userInfo.username = r.ops[0].username;
+                result.userInfo.nickname = r.ops[0].nickname;
+                result.userInfo.permission = r.ops[0].username == 'admin' ? 'admin' : 'user';
                 callback(result);
             });
         } else {

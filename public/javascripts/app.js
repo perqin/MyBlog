@@ -5,6 +5,13 @@ angular.module('MyBlog', [])
     .controller('TopBarController', ['$scope', 'UserInfo', function ($scope, UserInfo) {
         $scope.metaData = UserInfo.metaData;
         $scope.user = UserInfo.user;
+
+        $scope.login = UserInfo.login;
+        $scope.autoLogin = UserInfo.autoLogin;
+        $scope.register = UserInfo.register;
+        $scope.logout = UserInfo.logout;
+
+        $scope.autoLogin();
     }])
     .controller('PostListController', ['$scope', 'PostsCenter', function ($scope, PostsCenter) {
         $scope.posts = PostsCenter.posts;
@@ -33,7 +40,7 @@ angular.module('MyBlog', [])
 
         return piInstance;
     })
-    .factory('UserInfo', function () {
+    .factory('UserInfo', ['$http', function ($http) {
         var uiInstance = {};
 
         uiInstance.metaData = {
@@ -41,12 +48,47 @@ angular.module('MyBlog', [])
         };
         uiInstance.user = {
             permission: 'guest',
+            userId: -1,
             username: '',
             nickname: ''
         };
 
+        uiInstance.login = function (un, pw) {
+            $http.post('/api/login', { username: un, password: pw }).then(function (response) {
+                if (response.data.error.code == 0) {
+                    uiInstance.user.permission = response.data.data.permission;
+                    uiInstance.user.userId  =response.data.data.user_id;
+                    uiInstance.user.username = response.data.data.username;
+                    uiInstance.user.nickname = response.data.data.nickname;
+                }
+            });
+        };
+        uiInstance.autoLogin = function () {
+            uiInstance.login('', '');
+        };
+        uiInstance.register = function (un, pw, nn) {
+            $http.post('/api/register', { username: un, password: pw, nickname: nn }).then(function (response) {
+                if (response.data.error.code == 0) {
+                    uiInstance.user.permission = response.data.data.permission;
+                    uiInstance.user.userId  =response.data.data.user_id;
+                    uiInstance.user.username = response.data.data.username;
+                    uiInstance.user.nickname = response.data.data.nickname;
+                }
+            });
+        };
+        uiInstance.logout = function () {
+            $http.post('/api/logout', {}).then(function (response) {
+                if (response.data.error.code == 0) {
+                    uiInstance.user.permission = 'guest';
+                    uiInstance.user.userId = -1;
+                    uiInstance.user.username = '';
+                    uiInstance.user.nickname = '';
+                }
+            })
+        };
+
         return uiInstance;
-    })
+    }])
     .factory('PostsCenter', ['$http', function ($http) {
         var pcInstance = {};
 

@@ -15,13 +15,13 @@ function createPost(title, authorId, content, callback) {
 }
 
 function readPost(postId, callback) {
-    db.collection('posts').find({ _id: postId }).toArray().then(function (docs) {
+    db.collection('posts').find({ _id: postId }).project({ _id: 1, title: 1, summary: 1, author: 1, content: 1 }).toArray().then(function (docs) {
         callback(docs);
     });
 }
 
 function readPosts(callback) {
-    db.collection('posts').find().toArray().then(function (docs) {
+    db.collection('posts').find().project({ _id: 1, title: 1, summary: 1, author: 1 }).toArray().then(function (docs) {
         callback(docs);
     });
 }

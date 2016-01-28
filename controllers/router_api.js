@@ -11,9 +11,26 @@ router.post('/login', function(req, res, next) {
         }
     };
     if (req.session.username) {
-        resJson.error.code = 1;
-        resJson.error.message = 'Already login!';
-        res.send(JSON.stringify(resJson));
+        modelUser.findUserBy('username', req.session.username, function (err, items) {
+            if (err) {
+                resJson.error.code = 1;
+                resJson.error.message = 'Server error!';
+            } else if (items.length == 0) {
+                resJson.error.code = 1;
+                resJson.error.message = 'User not found!';
+                req.session.username = null;
+                //req.clearCookie();
+            } else {
+                resJson.error.code = 0;
+                resJson.error.message = 'Login succeed!';
+                resJson.data.permission = items[0].username == 'admin' ? 'admin' : 'user';
+                resJson.data.user_id = items[0]._id;
+                resJson.data.username = items[0].username;
+                resJson.data.nickname = items[0].nickname;
+                req.session.username = items[0].username;
+            }
+            res.send(JSON.stringify(resJson));
+        });
     } else {
         modelUser.findUserBy('username', req.body.username, function (err, items) {
             if (err) {
@@ -22,17 +39,48 @@ router.post('/login', function(req, res, next) {
             } else if (items.length == 0) {
                 resJson.error.code = 1;
                 resJson.error.message = 'User not found!';
+                req.session.username = null;
             } else if (items[0].password != req.body.password) {
                 resJson.error.code = 1;
-                resJson.erroe.message = 'Password incorrect!';
+                resJson.error.message = 'Password incorrect!';
+                req.session.username = null;
             } else {
                 resJson.error.code = 0;
                 resJson.error.message = 'Login succeed!';
-                resJson.data.permission = req.body.username == 'admin' ? 'admin' : 'user';
-                req.session.username = req.body.username;
+                resJson.data.permission = items[0].username == 'admin' ? 'admin' : 'user';
+                resJson.data.user_id = items[0]._id;
+                resJson.data.username = items[0].username;
+                resJson.data.nickname = items[0].nickname;
+                req.session.username = items[0].username;
             }
             res.send(JSON.stringify(resJson));
         })
+    }
+});
+
+router.post('/register', function (req, res, next) {
+    var resJson = {
+        error: {},
+        data: {}
+    };
+    if (req.session.username) {
+        resJson.error.code = 1;
+        resJson.error.message = 'Already login! Please logout first!';
+        res.send(JSON.stringify(resJson));
+    } else {
+        modelUser.createUser({
+            username: req.body.username,
+            nickname: req.body.nickname,
+            password: req.body.password
+        }, function (r) {
+            resJson.error.code = r.errorCode;
+            resJson.error.message = r.errorMsg;
+            resJson.data = r.userInfo;
+            if (resJson.error.code == 0) {
+                req.session.username = resJson.data.username;
+            }
+            res.send(JSON.stringify(resJson));
+        });
     }
 });
 
@@ -42,7 +90,7 @@ router.post('/logout', function (req, res, next) {
         data: {}
     };
     req.session.username = null;
-    req.clearCookie();
+    //req.clearCookie();
     resJson.error.code = 0;
     resJson.error.data = 'Logout successfully!';
     res.send(JSON.stringify(resJson));

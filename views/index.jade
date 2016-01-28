@@ -17,25 +17,25 @@ html(ng-app=appName)
                         span(ng-click="metaData.panelState = metaData.panelState == 'login' ? 'none' : 'login'") Login
                 div(ng-if="user.permission != 'guest'")
                     p
-                        span Nickname(username)
-                        span(ng-click="user.permission = 'guest'") Logout
+                        span {{ user.nickname }}({{ user.username }})
+                        span(ng-click="logout()") Logout
             div#register-login-panel(ng-if="user.permission == 'guest'")
                 div#register-panel(ng-if="metaData.panelState == 'register'")
                     span Username
-                    input
+                    input(ng-model="r_username")
                     span Password
-                    input
+                    input(ng-model="r_password")
                     span Confirm
-                    input
+                    input(ng-model="r_confirm")
                     span Nickname
-                    input
-                    button(ng-click="user.permission = 'user';metaData.panelState = 'none'") Register
+                    input(ng-model="r_nickname")
+                    button(ng-click="register(r_username, r_password, r_nickname);metaData.panelState = 'none'") Register
                 div#login-panel(ng-if="metaData.panelState == 'login'")
                     span Username
-                    input
+                    input(ng-model="l_username")
                     span Password
-                    input
-                    button(ng-click="user.permission = 'user';metaData.panelState = 'none'") Login
+                    input(ng-model="l_password")
+                    button(ng-click="login(l_username, l_password);metaData.panelState = 'none'") Login
         div#header-bar
             h1= appName
         div#content(ng-controller="PostListController")

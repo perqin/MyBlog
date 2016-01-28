@@ -1,15 +1,13 @@
 var rgx = {
-    username: /^[a-zA-Z][a-zA-Z0-9_]{5,17}$/,
+    username: /^[a-zA-Z][a-zA-Z0-9_]{4,17}$/,
     nickname: /^.{1,20}$/,
     password: /^[0-9a-zA-Z\-_]{6,12}$/
 };
 var errorMsg = {
-    username:           '6~18位英文字母、数字或下划线，英文字母开头',
-    sid:                '学号8位数字，不能以0开头',
+    username:           '5~18位英文字母、数字或下划线，英文字母开头',
+    nickname:           '',
     password:           '6~12位数字、大小写字母、中划线、下划线',
-    confirm_password:   '密码两次输入不一致',
-    phone:              '电话11位数字，不能以0开头',
-    email:              '邮箱不合法'
+    confirm_password:   '密码两次输入不一致'
 };
 
 function validate(k, v) {
