@@ -13,55 +13,78 @@ html(ng-app=appName)
             div#user-info-panel
                 div(ng-if="user.permission == 'guest'")
                     p
-                        span(ng-click="metaData.panelState = metaData.panelState == 'register' ? 'none' : 'register'") Register
-                        span(ng-click="metaData.panelState = metaData.panelState == 'login' ? 'none' : 'login'") Login
+                        span#span1(ng-click="metaData.panelState = metaData.panelState == 'register' ? 'none' : 'register'") Register
+                        span#span2(ng-click="metaData.panelState = metaData.panelState == 'login' ? 'none' : 'login'") Login
                 div(ng-if="user.permission != 'guest'")
                     p
-                        span {{ user.nickname }}({{ user.username }})
-                        span(ng-click="logout()") Logout
+                        span.span3 {{ user.nickname }}({{ user.username }})
+                        span.span3(ng-click="logout()") Logout
             div#register-login-panel(ng-if="user.permission == 'guest'")
-                div#register-panel(ng-if="metaData.panelState == 'register'")
+                div#register-panel.second(ng-if="metaData.panelState == 'register'")
                     span Username
-                    input(ng-model="r_username")
+                    input.register(ng-model="r_username")
                     span Password
-                    input(ng-model="r_password")
+                    input.register(ng-model="r_password")
                     span Confirm
-                    input(ng-model="r_confirm")
+                    input.register(ng-model="r_confirm")
                     span Nickname
-                    input(ng-model="r_nickname")
+                    input.register(ng-model="r_nickname")
                     button(ng-click="register(r_username, r_password, r_nickname);metaData.panelState = 'none'") Register
-                div#login-panel(ng-if="metaData.panelState == 'login'")
+                div#login-panel.second(ng-if="metaData.panelState == 'login'")
                     span Username
-                    input(ng-model="l_username")
+                    input.register(ng-model="l_username")
                     span Password
-                    input(ng-model="l_password")
+                    input.register(ng-model="l_password")
                     button(ng-click="login(l_username, l_password);metaData.panelState = 'none'") Login
         div#header-bar
             h1= appName
         div#content(ng-controller="PostListController")
-            button(ng-if="!metaData.addingNewPost",ng-click="toAddNewPost()") Add new post
-            div(ng-if="metaData.addingNewPost")
-                div
-                    input(ng-model="metaData.newPostTitle",placeholder="Post title")
-                div
-                    input(ng-model="metaData.newPostBody",placeholder="Post body")
-                div
-                    button(ng-click="addNewPost()") Post
-                    button(ng-click="metaData.addingNewPost = false") Cancel
-            h2 There {{ posts.length > 1 ? "are" : "is" }} {{ posts.length > 0 ? posts.length : "no" }} post{{ posts.length > 1 ? "s" : "" }}.
-            div(ng-repeat="post in posts")
+            div#add-post-container
+                button#button_add(ng-if="!metaData.addingNewPost",ng-click="toAddNewPost()") Add new post
+                div(ng-if="metaData.addingNewPost")
+                    div.post1#title1
+                        input(ng-model="metaData.newPostTitle",placeholder="Post title")
+                    div.post1#body1
+                        textarea(ng-model="metaData.newPostBody",placeholder="Post body")
+                    div.post1#button1
+                        button.button_(ng-click="addNewPost()") Post
+                        button.button_(ng-click="metaData.addingNewPost = false") Cancel
+                h2#post-count There {{ posts.length > 1 ? "are" : "is" }} {{ posts.length > 0 ? posts.length : "no" }} post{{ posts.length > 1 ? "s" : "" }}.
+            div.post2(ng-repeat="post in posts")
                 h3 {{ post.title }}
                 h5 {{ post.author_id }}
-                p Summary
+                p(ng-if="!post.expanded") {{ post.blocked ? "This content is blocked by admin." : post.summary }}
                 div#post-content-panel(ng-if="post.expanded")
-                    p {{ post.content }}
+                    p(ng-if="$parent.metaData.editingIndex != $index") {{ post.blocked ? "This content is blocked by admin." : post.content }}
+
                 div#post-edit-panel(ng-if="$parent.metaData.editingIndex == $index")
                     div
-                        input(ng-model="post.content")
+                        input.list1(ng-model="post.title")
+                        textarea.list1#text_edit(ng-model="post.content")
                     div
-                        button Update
-                        button(ng-click="$parent.metaData.editingIndex = -1") Cancel
+                        button.list1(ng-click="$parent.editPost($index, post.title, post.content);$parent.metaData.editingIndex = -1") Update
+                        button.list1(ng-click="$parent.metaData.editingIndex = -1") Cancel
                 div#post-action-panel
-                    button(ng-click="post.expanded = !post.expanded") {{ post.expanded ? "Collapse" : "Read more" }}
-                    button(ng-if="$parent.metaData.editingIndex == -1",ng-click="$parent.metaData.editingIndex = $index") Edit post
-                    button(ng-if="$parent.metaData.editingIndex == -1") Delete post
+                    button(ng-if="!post.blocked && $parent.metaData.editingIndex != $index",ng-click="$parent.readMore($index)") {{ post.expanded ? "Collapse" : "Read more" }}
+                    button(ng-if="$parent.user.permission == 'admin'",ng-click="$parent.blockPost($index, !post.blocked)") {{ post.blocked ? "Unblock" : "Block" }}
+                    button(ng-if="post.author_id == $parent.user.user_id && $parent.metaData.editingIndex == -1",ng-click="$parent.expandMore($index);$parent.metaData.editingIndex = $index") Edit post
+                    button(ng-if="post.author_id == $parent.user.user_id && $parent.metaData.editingIndex == -1",ng-click="$parent.deletePost($index)") Delete post
+                div#comment-content-panel(ng-if="post.expanded")
+                    h4 Comments
+                    div
+                        div#add-new-comment-panel
+                            input(ng-model="new_comment")
+                            button(ng-click="$parent.$parent.addNewComment($parent.post.post_id, $parent.$parent.user.nickname, $parent.$parent.user.user_id, new_comment);new_comment = ''") Comment
+                        div(ng-repeat="comment in post.comments")
+                            h5 {{ comment.author }}:
+                            blockquote
+                                div(ng-if="$parent.$parent.metaData.editingCommentIndex != $index")
+                                    p {{ comment.blocked ? "This content is blocked by admin." : comment.content }}
+                                div(ng-if="$parent.$parent.metaData.editingCommentIndex == $index")
+                                    input(ng-model="comment.content")
+                                    button(ng-click="$parent.$parent.metaData.editingCommentIndex = -1;$parent.$parent.updateComment($parent.post.post_id, comment.comment_id, comment.content)") Save
+                                    button(ng-click="$parent.$parent.metaData.editingCommentIndex = -1") Cancel
+                                div#comment-action-panel
+                                    button(ng-if="$parent.$parent.user.permission == 'admin'",ng-click="$parent.$parent.blockComment($parent.post.post_id, comment.comment_id, !comment.blocked)") {{ comment.blocked ? "Unblock" : "Block" }}
+                                    button(ng-if="comment.author_id == $parent.$parent.user.user_id && $parent.$parent.metaData.editingCommentIndex == -1",ng-click="$parent.$parent.metaData.editingCommentIndex = $index") Edit comment
+                                    button(ng-if="comment.author_id == $parent.$parent.user.user_id && $parent.$parent.metaData.editingCommentIndex == -1",ng-click="$parent.$parent.deleteComment($parent.post.post_id, comment.comment_id)") Delete comment

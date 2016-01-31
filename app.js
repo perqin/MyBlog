@@ -26,6 +26,7 @@ mongoClient.connect(dbUri, function (err, db) {
     // Init models
     require('./models/model_user').init(db);
     require('./models/model_post').init(db);
+    require('./models/model_comment').init(db);
 
     app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
     app.use(logger('dev'));
